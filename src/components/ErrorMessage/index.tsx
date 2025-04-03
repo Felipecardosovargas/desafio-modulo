@@ -9,17 +9,23 @@ import {
     CloseIcon,
 } from "./styles";
 import eclipseError from '../../assets/eclipseError.svg';
-import xIcon from '../../assets/x-icon.svg'; // Corrigido aqui
+import xIcon from '../../assets/x-icon.svg';
 
 interface ErrorMessageProps {
     message: string;
+    onClose: () => void; 
+    onDismis?: () => void;
 }
 
-const ErrorMessage: React.FC<ErrorMessageProps> = ({ message }) => {
-    const [showError, setShowError] = useState(true); // Estado para controlar a visibilidade do erro
+const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onClose, onDismis }) => {
+    const [showError, setShowError] = useState(true); 
 
     const handleCloseError = () => {
-        setShowError(false); // Fecha a mensagem de erro ao clicar no ícone
+        setShowError(false);
+        onClose(); 
+        if (onDismis) {
+            onDismis();
+        }
     };
 
     return (

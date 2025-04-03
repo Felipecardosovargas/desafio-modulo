@@ -9,6 +9,8 @@ export const Container = styled.div`
     height: 100vh;
     background-color: #1f1f1f;
     color: white;
+    margin: 0; 
+    padding: 0; 
 `;
 
 export const Screen = styled.div`

@@ -1,13 +1,16 @@
-import { api } from "./api";
+import axios from "axios";
+import { Repository, User } from "../@types";
 
-export const getUserRepositories = async (username: string) => {
-    try {
-    const response = await api.get(`/users/${username}/repos`);
-    return response.data;
-    } catch (error) {
-    console.error("Erro ao buscar repositórios:", error);
-    throw error;
-    }
+const api = axios.create({
+    baseURL: "https://api.github.com",
+});
+
+export const getUser = async (username: User) => {
+    const { data } = await api.get(`/users/${username}`);
+    return data;
 };
 
-// https://api.github.com/users/{username} e https://api.github.com/users/{username}/repos.
+export const getRepositories = async (username: Repository) => {
+    const { data } = await api.get(`/users/${username}/repos`);
+    return data;
+};

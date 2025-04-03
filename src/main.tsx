@@ -1,31 +1,18 @@
+// src/Main.tsx
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home/';
-import Profile from './pages/Profile/';
-import NotFound from './pages/NotFound'; // Importa a página 404
-
-function Main() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/profile/:username" element={<Profile />} /> 
-                <Route path="*" element={<NotFound />} />
-            </Routes>
-        </BrowserRouter>
-    );
-}
+import GlobalStyles from './GlobalStyles';
+import App from './App';
 
 document.addEventListener('DOMContentLoaded', function (event: Event) {
     const container = document.getElementById('root');
-    
+
     if (container) {
         const root = createRoot(container);
         root.render(
             <React.StrictMode>
-                <Main />
+                <GlobalStyles />
+                <App />
             </React.StrictMode>
         );
     } else {
@@ -33,4 +20,4 @@ document.addEventListener('DOMContentLoaded', function (event: Event) {
     }
 });
 
-export default Main;
+export default App;

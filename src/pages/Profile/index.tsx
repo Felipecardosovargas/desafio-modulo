@@ -1,78 +1,43 @@
-import React, { useEffect, useState } from "react";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules'; // Importação correta dos módulos
+import { useState } from "react";
+import { useGithubSearch } from "../../hooks/useGithubSearch";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
 import RepositoryCard from "../../components/RepositoryCard";
 import Loader from "../../components/Loader";
 import ErrorMessage from "../../components/ErrorMessage";
 import { Container, RepoTitle, BoxArea, SwiperArea, NextButton, PrevButton, ProfileTitle, InfoPearson } from "./styles";
 import Header from "../../components/Header";
 import InfoProfile from "../../components/InfoProfile";
-import RepositoryModal from "../../components/RepositoryModal";
+// import RepositoryModal from "../../components/RepositoryModal";
+import "swiper/css";
+import "swiper/css/navigation";
+import type { Repository } from "../../@types";
 
-// Importar os estilos do Swiper
-import 'swiper/css';
-import 'swiper/css/navigation';
-
-// Interfaces
-interface UserProfile {
-    avatar_url: string;
-    login: string;
-    name: string;
-    bio: string;
-}
-
-interface Repository {
-    id: number;
-    name: string;
-    description: string;
-}
-
-const Profile: React.FC = () => {
+const Profile = () => {
     const { username } = useParams<{ username: string }>();
-    const [user, setUser] = useState<UserProfile | null>(null);
-    const [repos, setRepos] = useState<Repository[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string>("");
-    const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null); // Estado para o repositório selecionado
+    const { user, repositories, isLoading, error } = useGithubSearch(username || "");
+    const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
 
-    // Função para lidar com o clique no card do repositório
     const handleCardClick = (repo: Repository, event: React.MouseEvent) => {
-        const isLink = (event.target as HTMLElement).closest("a");
-        if (!isLink) {
-            setSelectedRepo(repo);
-          console.log('Repo selecionado:', repo);  // Verifique no console
-        }
-        };
-    
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const userResponse = await axios.get(`https://api.github.com/users/${username}`);
-                const reposResponse = await axios.get(`https://api.github.com/users/${username}/repos`);
+      const isLink = (event.target as HTMLElement).closest("a");
+      if (!isLink) {
+          setSelectedRepo(repo);
+          console.log("Repo selecionado:", repo);
+      }
+    };
 
-                setUser(userResponse.data);
-                setRepos(reposResponse.data);
-            } catch (error) {
-                console.error(error);
-                setError("Erro ao buscar dados do usuário. Verifique o nome digitado.");
-            } finally {
-                setLoading(false);
-            }
-        };
+    if (isLoading) return <Loader />;
 
-        fetchData();
-    }, [username]);
-
-    if (loading) return <Loader />;
-    if (error) return <ErrorMessage message={error} />;
+    if (error) return <ErrorMessage
+      message="Usuário não encontrado!"
+      onClose={() => {}}
+      onDismis={() => {}}
+      />
 
     return (
         <Container>
             <Header />
-
             <BoxArea>
                 <InfoPearson>
                     <ProfileTitle>Informações do Perfil</ProfileTitle>
@@ -88,7 +53,7 @@ const Profile: React.FC = () => {
                         slidesPerView={3}
                         navigation={{ nextEl: ".next", prevEl: ".prev" }}
                         pagination={{ clickable: true }}
-                        modules={[Navigation, Pagination]} 
+                        modules={[Navigation, Pagination]}
                         breakpoints={{
                             480: { slidesPerView: 1 },
                             640: { slidesPerView: 1.5 },
@@ -98,23 +63,26 @@ const Profile: React.FC = () => {
                             1600: { slidesPerView: 4 },
                             1920: { slidesPerView: 5 },
                         }}
-                        style={{ padding: '1.4rem' }}
+                        style={{ padding: "1.4rem" }}
                     >
-                        {repos.map((repo) => (
+                        {repositories?.map((repo: any) => (
                             <SwiperSlide key={repo.id}>
                                 <RepositoryCard
-                                    name={repo.name}
-                                    description={repo.description}
-                                    onClick={(event) => handleCardClick(repo, event)} // Passa a função de clique para o card
+                                  name={repo.name}
+                                  description={repo.description}
+                                  link={repo.html_url} // Adicionei o link do repositório
+                                  language={repo.language || "Não especificado"} // Caso não tenha linguagem, exibe um padrão
+                                  stars={repo.stargazers_count} // Adiciona a contagem de estrelas
+                                  onClick={(event) => handleCardClick(repo, event)}
                                 />
                             </SwiperSlide>
                         ))}
                     </Swiper>
                 </SwiperArea>
 
-                {selectedRepo && (
+                {/* {selectedRepo && (
                     <RepositoryModal repo={selectedRepo} onClose={() => setSelectedRepo(null)} />
-                )}
+                )} */}
             </BoxArea>
         </Container>
     );
